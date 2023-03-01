@@ -13,15 +13,13 @@ function createDom(element) {
 }
 
 let nextUnitOfWork = null;
+let wipRoot = null; // 追踪 Root 树
 
 // 执行任务单元
 // fiber 架构：一种组织工作单元的树状数据结构
 function preforUnitOfWork(fiber) {
   if (!fiber.dom) {
     fiber.dom = createDom(fiber);
-  }
-  if (fiber.parent) {
-    fiber.parent.dom.appendChild(fiber.dom);
   }
 
   // 为当前的fiber创造子节点的fiber   fiber.child? === new;
@@ -64,28 +62,52 @@ function preforUnitOfWork(fiber) {
   }
 }
 
+function commitWork(fiber) {
+  if (!fiber) {
+    return;
+  }
+
+  // 向父节点添加
+  const domParent = fiber.parent.dom;
+  domParent.appendChild(fiber.dom);
+  commitWork(fiber.child);
+  commitWork(fiber.sibling);
+}
+
+function commitRoot() {
+  // 1. 渲染真实DOM
+  commitWork(wipRoot.child);
+  // 2. 维护 WipRoot
+  wipRoot = null;
+}
+
 
 function workLoop(deadline) {
   let shouldYield = true;
 
-  // 判断是否存在下一个任务单元 && 浏览器是否有空余的时间
+  // 判断是否存在下一个任务单元(fiber) && 浏览器是否有空余的时间
   while (nextUnitOfWork && shouldYield) {
     nextUnitOfWork = preforUnitOfWork(nextUnitOfWork);  // 执行工作单元
     shouldYield = deadline.timeRemaining() > 1;         // 得到浏览器当前帧剩余的时间  scheduler
   }
 
+  if (!nextUnitOfWork && wipRoot) {
+    commitRoot();
+  }
+
   requestIdleCallback(workLoop);
 }
-
 requestIdleCallback(workLoop);
 
 function render(element, container) {
-  nextUnitOfWork = {
+  wipRoot = {
     dom: container,
     props: {
       children: [element],
     },
   };
+  // 都为引用类型，会同步更改
+  nextUnitOfWork = wipRoot;
 }
 
 export default render;
