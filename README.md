@@ -46,6 +46,8 @@ function requestIdleCallback(callback: IdleRequestCallback)
 fiber 架构：一种组织工作单元的树状数据结构
 ```
 
+创建过程与遍历过程都是 深度优先
+
 ## renderAndCommit
 
 TODO: 同时创建虚拟 dom 和真实 dom，如果浏览器中断，则UI不完整
@@ -57,5 +59,9 @@ TODO: 同时创建虚拟 dom 和真实 dom，如果浏览器中断，则UI不完
 之后销毁 wipRoot；
 
 ## reconciliation
+
+协调阶段与 Diff 算法
+
+每次更新会保存提交的 fiber 树，在下一次更新时与旧 fiber 树进行比较；
 
 ## functionAndHooks

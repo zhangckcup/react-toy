@@ -1,16 +1,25 @@
-import MyReact from "./MyReact";
-// import { createRoot } from "react-dom/client";
+/** @jsxRuntime classic */
+import { jsx } from "react";
 
-const element = MyReact.createElement(
-  "div",
-  { title: "hello" },
-  "world",
-  MyReact.createElement("a", { href: "//baidu.com", target: "new" }, "baidu")
-);
+import React from "./MyReact";
+
 const root = document.getElementById("app");
 
-console.log(element, root);
+const updateValue = e => {
+  renderer(e.target.value);
+}
 
-MyReact.render(element, root);
+/** @jsx MyReact.createElement */
 
-// createRoot(root).render(element);
+const renderer = value => {
+  const element = (
+    <div>
+      <input onInput={updateValue} value={value} />
+      <h2>{value}</h2>
+    </div>
+  )
+
+  React.render(element, root);
+}
+
+renderer('123');
