@@ -1,3 +1,5 @@
+import { updateFunctionComponent } from "./hooks.js";
+
 function createDom(fiber) {
   const dom =
     fiber.type === "TEXT"
@@ -103,11 +105,6 @@ function reconcileChildren(wipFiber, elements) {
     preSibling = newFiber;
     index++;
   }
-}
-
-function updateFunctionComponent(fiber) {
-  const children = [fiber.type(fiber.props)];
-  reconcileChildren(fiber, children);
 }
 
 function updateHostComponents(fiber) {
