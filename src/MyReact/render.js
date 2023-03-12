@@ -105,9 +105,13 @@ function reconcileChildren(wipFiber, elements) {
   }
 }
 
-// 执行任务单元
-// fiber 架构：一种组织工作单元的树状数据结构
-function preforUnitOfWork(fiber) {
+function updateFunctionComponent(fiber) {
+  const children = [fiber.type(fiber.props)];
+  reconcileChildren(fiber, children);
+}
+
+function updateHostComponents(fiber) {
+  // reactElement 转换成一个真实DOM
   if (!fiber.dom) {
     fiber.dom = createDom(fiber);
   }
@@ -118,6 +122,18 @@ function preforUnitOfWork(fiber) {
 
   // 用于追加兄弟节点
   reconcileChildren(fiber, children);
+}
+
+// 执行任务单元
+// fiber 架构：一种组织工作单元的树状数据结构
+function preforUnitOfWork(fiber) {
+  // 判断是否是函数组件
+  const isFunctionComponet = fiber.type instanceof Function;
+  if (isFunctionComponet) {
+
+  } else {
+    updateHostComponents(fiber);
+  }
 
   // 深度优先遍历，寻找下一个任务单元
   if (fiber.child) {
@@ -135,13 +151,27 @@ function preforUnitOfWork(fiber) {
   }
 }
 
+function commitDeletion(fiber, domParent) {
+  if (fiber.dom) {
+    domParent.removeChild(fiber.dom);
+  } else {
+    commitDeletion(fiber.child, domParent);
+  }
+}
+
 function commitWork(fiber) {
   if (!fiber) {
     return;
   }
 
-  // 向父节点添加
-  const domParent = fiber.parent.dom;
+  // 向父节点添加 DOM
+  // const domParent = fiber.parent.dom;
+
+  let domParnetFiber = fiber.parent;
+  while (!domParnetFiber.dom) {
+    domParnetFiber = domParnetFiber.parent;
+  }
+  const domParent = domParnetFiber.dom;
 
   switch (fiber.effectTag) {
     case 'PLACEMENT':
@@ -151,7 +181,8 @@ function commitWork(fiber) {
       !!fiber.dom && updateDom(fiber.dom, fiber.alternate, fiber.props);
       break;
     case 'DELETION':
-      !!fiber.dom && domParent.appendChild(fiber.dom);
+      // !!fiber.dom && domParent.appendChild(fiber.dom);
+      commitDeletion(fiber, domParent);
       break;
   }
 

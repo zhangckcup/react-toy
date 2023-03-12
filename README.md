@@ -65,3 +65,14 @@ TODO: 同时创建虚拟 dom 和真实 dom，如果浏览器中断，则UI不完
 每次更新会保存提交的 fiber 树，在下一次更新时与旧 fiber 树进行比较；
 
 ## functionAndHooks
+
+添加 Function 组件中创建、删除 DOM 的部分逻辑；
+
+### hook
+
+hooks: [], index; 有对应关系；
+
+function A() {
+  let a = 1; // 每次都会执行，需要标记，告诉框架只需要执行一次；
+  return {a}
+}
